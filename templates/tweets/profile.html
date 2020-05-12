@@ -1,0 +1,93 @@
+{%extends 'tweets/base.html'%}
+{%block content%}
+<div class="row">
+    <div class="col-sm-4">
+        <h2>
+            {{object}}'s Profile
+  {%with request.user.profile.followings.all as followings%}
+
+                <a class="btn btn-danger" href="#"  data-id="{{object.id}}" data-action="{%if object in followings%}unfollow{%else%}follow{%endif%}" id='btn'>
+                    {%if object in followings%}unfollow{%else%}follow{%endif%}</a>
+                </a>
+                <span id="count">{{object.followed_by.count}} followers</span>
+
+ 
+    
+        </h2>
+            <h2>{{object}} following </h2>
+            {%for user in object.profile.followings.all%}
+                {{user}}
+            {%empty%}
+            <h2>No followings Yet</h2>
+            {%endfor%}
+
+            <hr>
+            <h2>followed by</h2>
+            {%for user in object.followed_by.all%}
+            {{user.user}}
+            {%endfor%}
+    </div>
+    <div class="col-sm-6">
+{%with object.tweets.all as tweets%}
+    {%for object in tweets %}
+    
+    <div class="media mt-3">
+        {%if object.image%}
+        <img class="mr-3" src="..." alt="Generic placeholder image">
+        {%endif%}
+        <div class="media-body">
+            {{object.text}} <br>
+            via {{object.user}} | {{object.created|timesince}} ago by | 
+            <a href="{{object.get_absolute_url}}">view</a>
+            <hr>
+     
+        </div>
+      </div>
+    
+      {%empty%}
+      <h2>No Tweet Yet</h2>
+      <a href="{%url 'home'%}">back home</a>
+    {%endfor%}
+    </div>
+    </div>
+    {%endwith%}
+    {%endwith%}
+
+    {%endblock%}
+
+    {%block script%}
+      $('#btn').click(function(e){
+          e.preventDefault()
+          console.log('starting')
+          var user_id=$(this).data('id')
+          var action=$(this).data('action')
+          var follow_count=parseInt($('#count').text())
+          console.log(follow_count)
+          $.post('{%url "method" 1%}',{'id':user_id,'action':action},
+          function(data){
+              if(data['status']=='ok'){
+                  console.log('done job')
+                    if(action=='follow'){
+                        $('#btn').text('unfollow')
+                        $('#btn').data('action','unfollow')
+                        var c= follow_count+1
+                        $('#count').text(c)
+                    }
+                    else{
+                        $("#btn").text('follow',)
+                        $('#btn').data('action','follow')
+                        var c= follow_count-1
+                        $('#count').text(c)
+                    }
+              }
+
+              }
+      
+          
+          
+          )      })
+
+        
+     
+
+    {%endblock%}

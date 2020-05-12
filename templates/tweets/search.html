@@ -1,0 +1,8 @@
+
+
+<!-- <nav class="navbar navbar-light bg-light"> -->
+    <form class="form-inline" action="{% url 'home'%}" id="search_form" method="GET">
+      <input class="form-control mr-sm-2" type="search" name='q' id="search_query" value="{{request.GET.q}}" placeholder="Search" aria-label="Search">
+      <button id="search" class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+    </form>
+ 

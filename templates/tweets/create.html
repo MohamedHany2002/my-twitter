@@ -1,0 +1,9 @@
+
+<form action="{%if url%}{{url}}{%endif%}" id="{{form_id}}" method="POST">
+    {%csrf_token%}
+    {{form.as_p}}
+    <br>
+    <button type="submit" class="btn btn-primary">create</button>
+    <span id="count" style="color: yellowgreen;">140</span>
+    <span id="caution" style="color: blue;"></span>
+</form>

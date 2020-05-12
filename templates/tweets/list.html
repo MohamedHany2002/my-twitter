@@ -1,0 +1,184 @@
+{%extends 'tweets/base.html'%}
+{%load tweet_tags%}
+{%block content%}
+{%load tweet_tags%}
+
+
+{%if not request.GET%}
+<div class="row">
+  <div class="col-sm-6 ml-2 mt-3 ">
+    
+    {%include 'tweets/create.html' with form_id="forma"%}
+    <!-- <form action="{%url 'create'%}" method="POST"> -->
+      <!-- {%csrf_token%}
+      {{form.text}} <br>
+     <button type="submit" class="btn btn-primary">create</button> -->
+  </form>
+
+  </div>
+</div>
+<hr>
+{%endif%}
+  <div id="append_created"></div>
+
+<div id="append" ></div>
+
+<div class="row">
+<div class="col-sm-8 col-sm-offset-left-2 ">
+
+{%for object in object_list%}
+
+<div class="media mt-3">
+    {%if object.image%}
+    <img class="mr-3" src="..." alt="Generic placeholder image">
+    {%endif%}
+    <div class="media-body">
+      {%if object.parentTweet%}
+        <h5 style="color: blue;">retweet via {{object.user.username}} at {{object.created|timesince}}</h5> 
+      {%endif%}
+        {%if object.hashtag%}
+        <a href="{{object.text|hash}}">#{{object.hashtag}}</a> 
+        <br>
+        {%endif%}
+        {{object.text}}
+        <br>
+        {%if object.parentTweet%}
+        via {{object.parentTweet.user}} | {{object.parentTweet.created|timesince}} ago by | 
+        <a href="{{object.parentTweet.get_absolute_url}}">view</a>
+        {%else%}
+        via {{object.user}} | {{object.created|timesince}} ago by | 
+        <a href="{{object.get_absolute_url}}">view</a>
+        {%endif%}
+        
+        | <a href="#" id="retweet" data-id="{{object.parentTweet.id}}">retweet</a>
+        <hr>
+        
+        
+ 
+    </div>
+  </div>
+
+  {%empty%}
+  <h2>No Tweet Yet</h2>
+  <a href="{%url 'home'%}">back home</a>
+{%endfor%}
+
+
+</div>
+</div>
+
+
+{%endblock%}
+
+{%block script%}
+var total=140
+var char_count=0
+$("#text_tweet").keyup(function(){
+  var count_charcters = $("#text_tweet").val().length
+  char_count=total-count_charcters
+  $("#count").text(char_count)
+  if(char_count>0){
+    $("#count").css("color","blue")
+  }
+  else{
+    $("#count").css("color","black")
+
+  }
+  
+})
+
+function fetchTweets(){
+  $.ajax({
+    url:'/api/tweet/home/',
+    data:{
+      "q":qu
+    },
+    method:"GET",
+    success:function(data){
+      if(data.length>0){
+        $.each(data,function(key,value){
+
+          $("#append").append(value.text+"</br>"+" via <a href='"+ value.user.profile_url +"'>" +value.user.username+"</a> "+"| "+value.time_since+" | "+"<a href=''>view</a>"+"</br>"+"<hr>")
+        })
+      console.log("success")
+      console.log(data)
+      }
+      else{
+        $("#append").text("no search found")
+      }
+    },
+    error:function(data){
+      console.log("dals")
+      console.log(data)
+    }
+  })
+}
+fetchTweets()
+$('#forma').submit(function(e){
+  e.preventDefault()
+  form=$(this)
+  console.log(":created")
+  console.log($(this))
+  //
+
+  if(char_count>=0){
+    console.log('not nice')
+  $.ajax({
+    url:'/api/tweet/create/',
+    data:form.serialize(),
+    method:"POST",
+    success:function(data){
+      console.log('created')
+      $('#text_tweet').val("")
+      $("#append_created").prepend(data.text+"</br>"+" via "+data.user.username+" "+"| "+data.time_since+" | "+"<a href=''>view</a>"+"</br>"+"<hr>")
+      $("#count").text("140")
+
+      <!-- fetchTweets() -->
+    },
+    error:function(data){
+      console.log("dals")
+      console.log(data)
+    }
+  })
+}
+else{
+  console.log("prevented")
+  $("#caution").text("please type less than 140")
+}
+
+})
+
+<!--  -->
+  var qu=getParameterByName('q')
+  console.log(qu)
+    console.log("dm")
+    console.log("hello")
+    fetchTweets()
+
+$("#retweet").click(function(e){
+  console.log('here')
+  e.preventDefault()
+  var tweet_id = $(this).data('id')
+  $.ajax({
+    url:'{%url "retweet" tweet_id%}',
+    data:{'id':tweet_id},
+    method:"POST",
+    success:function(data){
+      console.log('created')
+      $('#text_tweet').val("")
+      $("#append_created").prepend(data.text+"</br>"+" via "+data.user.username+" "+"| "+data.time_since+" | "+"<a href=''>view</a>"+"</br>"+"<hr>")
+      $("#count").text("140")
+
+      <!-- fetchTweets() -->
+    },
+    error:function(data){
+      console.log("dals")
+      console.log(data)
+    }
+  })
+
+})
+
+
+
+{%endblock%}
